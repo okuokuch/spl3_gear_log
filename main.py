@@ -1,4 +1,3 @@
-from cmath import log
 from libs import get_token
 from libs import processing
 import pickle
@@ -7,6 +6,7 @@ import json
 import pyperclip
 import logging
 import logging.config
+from tkinter import messagebox
 
 #loggingの設定
 logging.config.fileConfig('./asset/logging.ini')
@@ -29,9 +29,9 @@ if __name__ == '__main__':
     gear_info = processing.ProcessingGearData()
     id = gear_info.read_last_vs_log_id('./data/setting.ini')
     aquired_vs_log_id_list = gear_info.get_aquired_vs_log_id_list(result, id)
+    all_gear = login.get_results('all_gear')
     if len(aquired_vs_log_id_list) != 0:
         vs_dict_list = login.get_aquired_vs_detail_results(aquired_vs_log_id_list)
-        all_gear = login.get_results('all_gear')
         try:
             old_additional_gear_powers_df = pd.read_csv('./data/last_additional_gear_power.csv', encoding='shift-jis', index_col=0)
             old_additional_gear_power_log = pd.read_csv('./data/raw_gear_power_log.csv', encoding='shift-jis', index_col=0)
@@ -41,4 +41,7 @@ if __name__ == '__main__':
             gear_info.make_additional_gear_log(all_gear, vs_dict_list)
             gear_info.save_latest_vs_log_id('./data/setting.ini', result)
     else:
-        print('新たな対戦がないため、更新しませんでした。')
+        additional_gear_power_df = gear_info.get_additional_gear_power_df(all_gear)
+        additional_gear_power_df.to_csv('./data/last_additional_gear_power.csv', encoding='shift-jis')
+        logger.info('新たな対戦がありませんでした。last_additional_gear_powerのみ更新します。')
+    messagebox.showinfo('結果','処理が終了しました。\n更新ログはlogging.iniで確認できます。')
