@@ -196,11 +196,13 @@ class ProcessingGearData:
         if 'old_additional_gear_powers_df' in dfs.keys():
             old_additional_gear_powers_df = dfs['old_additional_gear_powers_df']
             additional_gear_power_df.to_csv('./data/last_additional_gear_power.csv', encoding='shift-jis')
+            logger.info('last_additional_gear_powerを更新しました。')
             additional_gear_power_df = self.add_new_flag(additional_gear_power_df, cleaning_list, old_additional_gear_powers_df)
             max_slot_of_additional_gear_power = self.get_max_slot_of_additional_gear_power(old_additional_gear_powers_df)
         else:
-            print('過去のギアパワー一覧はありません。')
+            logger.info('過去のギアパワー一覧はありません。')
             additional_gear_power_df.to_csv('./data/last_additional_gear_power.csv', encoding='shift-jis')
+            logger.info('last_additional_gear_powerを更新しました。')
             additional_gear_power_df = self.add_new_flag(additional_gear_power_df, cleaning_list)
             max_slot_of_additional_gear_power = pd.DataFrame(columns=['gear_name', 'gear_slot'])
         not_cleaning_additional_gear_power = self.get_not_cleaning_additional_gear_power(additional_gear_power_df, max_slot_of_additional_gear_power)
@@ -209,9 +211,13 @@ class ProcessingGearData:
             old_additional_gear_power_log = dfs['old_additional_gear_power_log']
             raw_gear_log = self.get_additional_gear_log(all_additional_gear_power, old_additional_gear_power_log)
             raw_gear_log.to_csv('./data/raw_gear_power_log.csv', encoding='shift-jis')
+            logger.info('raw_gear_power_logを更新しました。')
             raw_gear_log.pivot(index='gear_name', columns='gear_slot', values = 'additional_gear_power').to_csv('./data/gear_power_log.csv', encoding='shift-jis')
+            logger.info('gear_power_logを更新しました。')
         else:
-            print('過去のギアパワー取得ログはありません。')
+            logger.info('過去のギアパワー取得ログはありません。')
             raw_gear_log = self.get_additional_gear_log(all_additional_gear_power)
             raw_gear_log.to_csv('./data/raw_gear_power_log.csv', encoding='shift-jis')
+            logger.info('raw_gear_power_logを作成しました。')
             raw_gear_log.pivot(index='gear_name', columns='gear_slot', values = 'additional_gear_power').to_csv('./data/gear_power_log.csv', encoding='shift-jis')
+            logger.info('gear_power_logを作成しました。')
