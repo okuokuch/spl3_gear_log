@@ -7,12 +7,30 @@ import pyperclip
 import logging
 import logging.config
 from tkinter import messagebox
+import os
 
 #loggingの設定
 logging.config.fileConfig('./asset/logging.ini')
 logger = logging.getLogger('root')
 
-if __name__ == '__main__':
+def is_writable(file_path):
+    try:
+        with open(file_path, 'a') as f:
+            pass
+        return True
+    except PermissionError:
+        logger.warn('{}が開かれており、更新できません。閉じて再実行してください。'.format(file_path))
+        return False
+
+def update_gear_log():
+    path = './data'
+    files_name = os.listdir(path)
+    files_file_name = [f for f in files_name if os.path.isfile(os.path.join(path, f))]
+    for file_name in files_file_name:
+        file_path = path + '/' + file_name
+        if not(is_writable(file_path)):
+            messagebox.showinfo('結果','処理が異常終了しました。更新されていません。\n詳細は更新ログはlogging.iniで確認できます。')
+            return
     login = get_token.Login('./data/setting.ini')
     result = login.get_results('latestBattleHistories')
     if result == False:
@@ -45,3 +63,6 @@ if __name__ == '__main__':
         additional_gear_power_df.to_csv('./data/last_additional_gear_power.csv', encoding='shift-jis')
         logger.info('新たな対戦がありませんでした。last_additional_gear_powerのみ更新します。')
     messagebox.showinfo('結果','処理が終了しました。\n更新ログはlogging.iniで確認できます。')
+
+if __name__ == '__main__':
+    update_gear_log()
