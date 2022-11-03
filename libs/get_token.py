@@ -161,7 +161,7 @@ class Login():
         response = requests.post(url, data = json.dumps(data), headers = header)
         response_dict = json.loads(response.text)
         registration_token = response_dict['result']['webApiServerCredential']['accessToken']
-        logger.info('session_token作成成功')
+        logger.info('registration_token作成成功')
         return registration_token
 
     def get_gtoken(self, registration_token) ->str:
