@@ -122,6 +122,59 @@ class ProcessingGearData:
             data = self.add_gear_power_to_data(data, record_origin, vs_detail['player'], 'shoesGear')
         return pd.DataFrame(data)#対戦記録から取得できるギアパワー一覧のdf
 
+    def get_vs_info_from_vs_log(self, vs_log:list)->pd.DataFrame:
+        """対戦ログ詳細からを格納したリストから、対戦の勝敗などの結果を取得しdfで返す。ギアが取得する経験値の計算に用いる"""
+        data = []
+        for record in vs_log:
+            record_origin = {}
+            vs_detail = record['data']['vsHistoryDetail']
+            if vs_detail['judgement'] == 'DRAW':
+                continue
+            record_origin['playedTime'] = vs_detail['playedTime']
+            record_origin['id'] = vs_detail['id']
+            record_origin['vs_mode'] = vs_detail['vsMode']['mode']
+            record_origin['judgement'] = vs_detail['judgement']
+            record_origin['paint'] = vs_detail['player']['paint']
+            record_origin['knockout'] = vs_detail['knockout']
+            record_origin['duration'] = vs_detail['duration']
+            record_origin['vs_score'] = vs_detail['myTeam']['result']['score']
+            data.append(record_origin)
+        return pd.DataFrame(data)#対戦記録から取得できる対戦結果詳細のdf
+
+    def calc_exp_for_bankara(self, judgement, knockout, duration, vs_score)->int:
+        """バンカラマッチの対戦記録から基本取得経験値を計算する。"""
+        if knockout == 'WIN':
+            return 2500
+        exp = 0
+        if judgement == 'WIN':
+            exp += 1500
+        exp += (duration//60)*100
+        exp += vs_score*5
+        return (int(exp))
+
+    def cacl_exp_for_nawabari(self, judgment, paint)->int:
+        """ナワバリバトルの対戦記録から、基本取得計算値を計算する。"""
+        exp = 300#タイムボーナス
+        if judgment == 'WIN':
+            exp += 600
+        if paint >= 500:
+            exp += 500
+        elif paint < 100:
+            exp += 100
+        else:
+            exp += (paint//100)*100
+        return exp
+
+    def add_base_exp_to_vs_info_df(self, vs_info:pd.DataFrame)->pd.DataFrame:
+        """対戦記録のdfに基礎経験値を追加する"""
+        vs_info['exp'] = vs_info.apply(
+            lambda x: 
+                self.calc_exp_for_bankara(x['judgement'], x['knockout'], x['duration'],x['vs_score']) 
+                if x['vs_mode'] == 'BANKARA' 
+                else self.cacl_exp_for_nawabari(x['judgement'], x['paint']),
+            axis=1
+            )
+
     def get_cleaning_gear_list(self, additional_gear_power_from_vs_log:pd.DataFrame)->list:
         """クリーニングされたギアの一覧を取得し、リストとして返す。"""
         return additional_gear_power_from_vs_log[
