@@ -18,11 +18,13 @@ class ProcessingGearData:
         data['gear_name'] = gear_dict['name']
         data['gear_type'] = gear_dict['__typename']
         data['gear_id'] = gear_dict[gear_type]
+        data['rarity'] = gear_dict['rarity']
         data['brand_id'] = gear_dict['brand']['id']
         data['brand_name'] = gear_dict['brand']['name']
         data['primaryGearPowerid'] = gear_dict['primaryGearPower']['gearPowerId']
         data['primaryGearPower_name'] = gear_dict['primaryGearPower']['name']
         data['additionalGearPowers'] = gear_dict['additionalGearPowers']
+        data['exp'] = gear_dict['stats']['exp']
         return data
 
     def get_additional_gear_powers(self, gear_dict, slot)->dict:
