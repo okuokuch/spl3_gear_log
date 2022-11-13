@@ -4,7 +4,7 @@ import hashlib
 import json
 import requests
 import configparser
-from libs import constant
+import constant
 import logging
 import logging.config
 
